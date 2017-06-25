@@ -53,14 +53,23 @@ int main()
 		printf( "X1: %6d  Y1: %6d  ", axis[0], axis[1] );
 		printf( "X2: %6d  Y2: %6d  ", axis[3], axis[4] );
 		printf( "LT: %6d  RT: %6d  ", axis[2], axis[5] );
+		printf( "PADX: %6d  PADY: %6d  ", axis[6], axis[7] );
 		
-		//FIGURE OUT REST OF BUTTONS/AXIS
 
-		for( x=0 ; x<num_of_buttons ; ++x )
-			printf("B%d: %d  ", x, button[x] );
+		printf("A: %d  ", button[0] );
+		printf("B: %d  ", button[1] );
+		printf("X: %d  ", button[2] );
+		printf("Y: %d  ", button[3] );
+		printf("LB: %d  ", button[4] );
+		printf("RB: %d  ", button[5] );
+		printf("BACK: %d  ", button[6] );
+		printf("START: %d  ", button[7] );
+		printf("XBOX: %d  ", button[8] );
+		printf("STICK1: %d  ", button[9] );
+		printf("STICK2: %d  ", button[10] );
 
 		printf("  \r");
-		//fflush(stdout);
+		fflush(stdout);
 	}
 
 	close( joy_fd );	/* too bad we never get here */
