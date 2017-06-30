@@ -38,7 +38,7 @@ EXAMPLES_DIR=/usr/local/bin
 REMOTE_EXAMPLES_DIR=/usr/local/bin
 
 # define all programs
-PROGRAMS = gettingstarted
+PROGRAMS = transmit
 
 # *****************************************
 BINARY_PREFIX = rf24
