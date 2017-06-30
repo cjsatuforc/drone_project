@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/joystick.h>
+#include "definitions.h"
+
 
 #define JOY_DEV "/dev/input/js0"
 
