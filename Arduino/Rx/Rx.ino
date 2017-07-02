@@ -118,8 +118,8 @@ void loop() {
       Serial.println(but_pos[8]); Serial.print("   ");
    }
 
-unsigned long time = millis();
-Serial.println(time);
+//unsigned long time = millis();
+//Serial.println(time);
 
 
 }

@@ -12,12 +12,13 @@
 #include "definitions.h"
 
 using namespace std;
+int16_t divide_func(int16_t iposition, int16_t position_old);
 
 RF24 radio(22,0);
 bool radioNumber = 1;
 
 const uint8_t pipes[][6] = {"1Node","2Node"};
-
+int16_t position_old, iposition;
 
 int main(int argc, char** argv){
 //Setting up radio stuff
@@ -70,38 +71,48 @@ int main(int argc, char** argv){
 			{
 				case 0:
 					joystick.button = JS1_X;
-   					joystick.position = js.value;
+   					iposition = js.value;
+   					joystick.position = divide_func(iposition, position_old);
 					break;
 				case 1:
 					joystick.button = JS1_Y;
-   					joystick.position = js.value;
+   					iposition = js.value;
+   					joystick.position = divide_func(iposition, position_old);
 					break;
 				case 2:
 					joystick.button = LT;
-   					joystick.position = js.value;
+   					iposition = js.value;
+   					joystick.position = divide_func(iposition, position_old);
 					break;
 				case 3:
 					joystick.button = JS2_X;
-   					joystick.position = js.value;
+   					iposition = js.value;
+   					joystick.position = divide_func(iposition, position_old);
 					break;
 				case 4:
 					joystick.button = JS2_Y;
-   					joystick.position = js.value;
+   					iposition = js.value;
+   					joystick.position = divide_func(iposition, position_old);
 					break;
 				case 5:
 					joystick.button = RT;
-   					joystick.position = js.value;
+   					iposition = js.value;
+   					joystick.position = divide_func(iposition, position_old);
 					break;
 				case 6:
 					joystick.button = CP_X;
-   					joystick.position = js.value;
+   					iposition = js.value;
+   					joystick.position = divide_func(iposition, position_old);
 					break;
 				case 7:
 					joystick.button = CP_Y;
-   					joystick.position = js.value;
+   					iposition = js.value;
+   					joystick.position = divide_func(iposition, position_old);
 					break;
 			} 
+		position_old = iposition;
 		}
+		
 
 		else if((js.type & ~JS_EVENT_INIT) == JS_EVENT_BUTTON)
 		{
@@ -148,15 +159,15 @@ int main(int argc, char** argv){
 		}
 
 
-/*		switch (js.type & ~JS_EVENT_INIT)
-		{
-			case JS_EVENT_AXIS:
-				axis   [ js.number ] = js.value;
-				break;
-			case JS_EVENT_BUTTON:
-				button [ js.number ] = js.value;
-				break;
-		} */
+
+
+
+
+
+
+
+
+
 
 		//printf("Now sending...\n");
 		if(js.number != oldjs.number)
@@ -181,3 +192,26 @@ int main(int argc, char** argv){
 	return 0;
 }
 
+int16_t divide_func(int16_t iposition, int16_t position_old)
+{
+	if(abs((iposition - position_old) < 200 ))
+	{
+		joystick.position = joystick.position;
+	}
+
+	if((iposition > (-4000)) && (iposition < (0)))
+	{
+		joystick.position = 0; 
+	}
+	else if((iposition < 4000) && (iposition > (0)))
+	{
+		joystick.position = 0; 
+	}
+
+	else
+	{
+		joystick.position = iposition/1000; 
+	}
+
+	return joystick.position;
+}
