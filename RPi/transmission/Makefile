@@ -38,7 +38,7 @@ EXAMPLES_DIR=/usr/local/bin
 REMOTE_EXAMPLES_DIR=/usr/local/bin
 
 # define all programs
-PROGRAMS = js_transmit_imp
+PROGRAMS = js_transmit_imp_o
 
 # *****************************************
 BINARY_PREFIX = rf24

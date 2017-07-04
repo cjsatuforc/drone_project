@@ -6,7 +6,7 @@
 struct js_pos {
    uint8_t button;
    int16_t  position;
-} joystick;
+} joystick, old_joystick, js_buttons;
 
 #define JOY_DEV "/dev/input/js0"
 

@@ -37,7 +37,7 @@ int main(int argc, char** argv){
 //Controller stuff
 	int joy_fd, num_of_axis=0, num_of_buttons=0;
 	char name_of_joystick[80];
-	struct js_event js;
+	struct js_event js, oldjs;
 
 	if( ( joy_fd = open( JOY_DEV , O_RDONLY)) == -1 )
 	{
@@ -169,9 +169,11 @@ int main(int argc, char** argv){
 
 
 
+
+
 		//printf("Now sending...\n");
-		if(joystick.position != old_joystick.position) //joystick.position != old_joystick.position
-		{
+		//if(js.number != oldjs.number)
+		//{
 			bool ok = radio.write( &joystick, sizeof(joystick) );
 			if (!ok)
 			{
@@ -184,9 +186,9 @@ int main(int argc, char** argv){
 				printf("%u    \n" , joystick.button  );}
 				
 			}
-		old_joystick = joystick;
+			oldjs = js;
 
-	}
+		//}
 
 	close( joy_fd );
 	return 0;
@@ -199,11 +201,11 @@ int16_t divide_func(int16_t iposition, int16_t position_old)
 		joystick.position = joystick.position;
 	}
 
-	if((iposition > (-5000)) && (iposition < (0)))
+	if((iposition > (-4000)) && (iposition < (0)))
 	{
 		joystick.position = 0; 
 	}
-	else if((iposition < 5000) && (iposition > (0)))
+	else if((iposition < 4000) && (iposition > (0)))
 	{
 		joystick.position = 0; 
 	}
