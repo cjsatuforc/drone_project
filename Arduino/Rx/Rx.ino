@@ -9,22 +9,18 @@ byte addresses[][6] = {"1Node","2Node"};
 int16_t ax_pos[8] = {0,0,0,0,0,0,0,0};
 int16_t but_pos[9] = {0,0,0,0,0,0,0,0};
 
+
 void setup() {
   Serial.begin(115200);
-  Serial.println(F("RF24/examples/GettingStarted"));
- 
+  
   printf_begin();
   radio.begin();
-
-  // Set the PA Level low to prevent power supply related issues since this is a
- // getting_started sketch, and the likelihood of close proximity of the devices. RF24_PA_MAX is default.
+  
   radio.setPALevel(RF24_PA_LOW);
+  radio.openWritingPipe(addresses[0]);
+  radio.openReadingPipe(1,addresses[1]);
   
-  // Open a writing and reading pipe on each radio, with opposite addresses
-    radio.openWritingPipe(addresses[0]);
-    radio.openReadingPipe(1,addresses[1]);
-  
-    radio.startListening();
+  radio.startListening();
 }
 
 
@@ -117,10 +113,6 @@ void loop() {
       Serial.print(but_pos[7]); Serial.print("   ");
       Serial.println(but_pos[8]); Serial.print("   ");
    }
-
-//unsigned long time = millis();
-//Serial.println(time);
-
 
 }
 
