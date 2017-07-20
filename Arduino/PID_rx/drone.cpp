@@ -1,14 +1,14 @@
 #include "drone.h"
 #include "PID_v1.h"
 #include "RF24.h"
-#include "C:\Users\admin1\Documents\Drone project\Arduino\PID_rx\definitions.h"
+#include "definitions.h"
 #include <SPI.h>
+
 
 bool radioNumber = 0;
 
 byte addresses[][6] = {"1Node","2Node"};
-int16_t ax_pos[8] = {0,0,0,0,0,0,0,0};
-int16_t but_pos[9] = {0,0,0,0,0,0,0,0};
+
 
 
 double left_front, right_front, left_back, right_back;  
@@ -28,7 +28,6 @@ PID pitch_PID(&pitch_angle, &err_pitch, &pitch_setpoint, pitch_kp, pitch_ki, pit
 PID yaw_PID(&yaw_angular_vel, &err_yaw, &yaw_setpoint, yaw_kp, yaw_ki, yaw_kd, DIRECT);
 
 RF24 radio(7,8);
-
 
 
 
@@ -59,8 +58,10 @@ void RADIO_init()
   radio.startListening();
 }
 
-void PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttle)
+motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttle)
 {
+    motor PWMmotor;
+
     roll_setpoint = js_roll; // roll_left;
     pitch_setpoint = js_pitch; // pitch_forward;
     yaw_setpoint = js_yaw; // yaw_ccw;
@@ -74,15 +75,15 @@ void PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttle
     pitch_PID.Compute();
     yaw_PID.Compute();
 
-    right_back = thrust*altitude_coeff - err_pitch + err_roll - err_yaw;
-    right_front = thrust*altitude_coeff - err_pitch - err_roll + err_yaw;
-    left_back = thrust*altitude_coeff + err_pitch + err_roll + err_yaw;
-    left_front = thrust*altitude_coeff + err_pitch - err_roll - err_yaw;
+    right_back = thrust*altitude_coeff - 10*err_pitch + 10*err_roll - 10*err_yaw;
+    right_front = thrust*altitude_coeff - 10*err_pitch - 10*err_roll + 10*err_yaw;
+    left_back = thrust*altitude_coeff + 10*err_pitch + 10*err_roll + 10*err_yaw;
+    left_front = thrust*altitude_coeff + 10*err_pitch - 10*err_roll - 10*err_yaw;
 
-    PWM_RB = map(right_back, 1500, 50000, 1000, 2000);
-    PWM_RF = map(right_back, 1500, 50000, 1000, 2000);
-    PWM_LB = map(right_back, 1500, 50000, 1000, 2000);
-    PWM_LF = map(right_back, 1500, 50000, 1000, 2000);
+    PWMmotor.PWM_RB = map(right_back, 1500, 50000, 1000, 2000);
+    PWMmotor.PWM_RF = map(right_front, 1500, 50000, 1000, 2000);
+    PWMmotor.PWM_LB = map(left_back, 1500, 50000, 1000, 2000);
+    PWMmotor.PWM_LF = map(left_front, 1500, 50000, 1000, 2000);
     
     // left_front = thrust*altitude_coeff - pitch_setpoint*10 + roll_setpoint*10 - yaw_setpoint;
     // right_front = thrust*altitude_coeff - pitch_setpoint*10 - roll_setpoint*10 + yaw_setpoint;
@@ -90,21 +91,28 @@ void PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttle
     // right_back = thrust*altitude_coeff + pitch_setpoint*10 - roll_setpoint*10 - yaw_setpoint;
     
     // set motor limits
-    if (right_back > maxPWM) right_back = maxPWM;
-    else if (right_back < minPWM) right_back = minPWM;      
+    if (PWMmotor.PWM_RB > maxPWM) PWMmotor.PWM_RB = maxPWM;
+    else if (PWMmotor.PWM_RB < minPWM) PWMmotor.PWM_RB = minPWM;      
         
-    if (right_front > maxPWM) right_front = maxPWM;
-    else if (right_front < minPWM) right_front = minPWM;    
+    if (PWMmotor.PWM_RF > maxPWM) PWMmotor.PWM_RF = maxPWM;
+    else if (PWMmotor.PWM_RF < minPWM) PWMmotor.PWM_RF = minPWM;    
         
-    if (left_back > maxPWM) left_back = maxPWM;
-    else if (left_back < minPWM) left_back = minPWM;        
+    if (PWMmotor.PWM_LB > maxPWM) PWMmotor.PWM_LB = maxPWM;
+    else if (PWMmotor.PWM_LB < minPWM) PWMmotor.PWM_LB = minPWM;        
         
-    if (left_front > maxPWM) left_front = maxPWM;
-    else if (left_front < minPWM) left_front = minPWM;
+    if (PWMmotor.PWM_LF > maxPWM) PWMmotor.PWM_LF = maxPWM;
+    else if (PWMmotor.PWM_LF < minPWM) PWMmotor.PWM_LF = minPWM;
+
+    return PWMmotor;
+    
 }
 
-void RADIO_read()
+void RADIO_read(int16_t* ax_pos, int16_t* but_pos)
 {
+  
+  //int16_t ax_pos[8] = {0,0,0,0,0,0,0,0};
+  //int16_t but_pos[9] = {0,0,0,0,0,0,0,0};
+  
     if( radio.available()){
                                                           // Variable for the received timestamp
     while (radio.available()) 
@@ -121,7 +129,7 @@ void RADIO_read()
             ax_pos[0] = joystick.position;
             break;
           case JS1_Y:
-            ax_pos[1] = joystick.position;
+            ax_pos[1] = joystick.position *-1;
             break;
           case JS2_X:
             ax_pos[3] = joystick.position;
