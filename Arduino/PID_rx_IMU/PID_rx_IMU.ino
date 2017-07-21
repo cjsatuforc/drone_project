@@ -44,7 +44,7 @@ void loop()
       //SET SERVOS PWM
     }
     
-    IMU_read();
+    IMU_read(ypr);
   
     
     Serial.print(PWMmotor.PWM_RB);
@@ -56,6 +56,11 @@ void loop()
     Serial.println(PWMmotor.PWM_LF); 
 
 }
+
+
+
+
+
 
 void IMU_init()
 {
@@ -113,7 +118,7 @@ void IMU_init()
 }
 
 
-void IMU_read()
+void IMU_read(float* ypr)
 {
     mpuInterrupt = false; // reset interrupt flag and get INT_STATUS byte
     mpuIntStatus = mpu.getIntStatus();
@@ -144,5 +149,8 @@ void IMU_read()
             Serial.print("\t");
             Serial.println(ypr[2] * 180/M_PI);
             Serial.println(mpuInterrupt);
+
+            
+            
     }
   }
