@@ -126,16 +126,16 @@ void RADIO_read(int16_t* ax_pos, int16_t* but_pos)
   switch (joystick.button)
         {
           case JS1_X:
-            ax_pos[0] = joystick.position *-1;
+            ax_pos[0] = joystick.position * -1;
             break;
           case JS1_Y:
-            ax_pos[1] = joystick.position *-1;
+            ax_pos[1] = joystick.position * -1;
             break;
           case JS2_X:
             ax_pos[3] = joystick.position;
             break;
           case JS2_Y:
-            ax_pos[4] = joystick.position *-1;
+            ax_pos[4] = joystick.position * -1;
             break;
           case LT:
             ax_pos[2] = joystick.position;

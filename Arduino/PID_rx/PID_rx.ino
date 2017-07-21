@@ -21,8 +21,8 @@ void loop()
 
     js_throttle = ax_pos[1];
     js_yaw = ax_pos[0];
-    js_pitch = ax_pos[4];
-    js_roll = ax_pos[3];
+    js_pitch = ax_pos[3];
+    js_roll = ax_pos[4];
     
     
     PWMmotor = PID_loop(js_roll, js_pitch, js_yaw, js_throttle);
