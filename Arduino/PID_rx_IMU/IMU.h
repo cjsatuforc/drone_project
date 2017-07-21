@@ -8,6 +8,9 @@
 
 bool IMU_init();
 void IMU_read();
+bool dmpDataReady();
+
+// MPU control/status vars
 
 
 
