@@ -58,7 +58,7 @@ void RADIO_init()
   radio.startListening();
 }
 
-motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttle)
+motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttle, int16_t IMUyaw, float IMUpitch, float IMUroll)
 {
     motor PWMmotor;
 
@@ -67,9 +67,10 @@ motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttl
     yaw_setpoint = js_yaw; // yaw_ccw;
     altitude_coeff = js_throttle; // throttle_up;
 
-    roll_angle = 0; //ypr[2] * 180/M_PI; 
-    pitch_angle = 0; //ypr[1] * 180/M_PI;
-    yaw_angular_vel = 0; //gyro[2];
+    roll_angle = IMUroll; //ypr[2] * 180/M_PI; 
+    pitch_angle = IMUpitch; //ypr[1] * 180/M_PI;
+    yaw_angular_vel = IMUyaw; //gyro[2];
+
 
     roll_PID.Compute();
     pitch_PID.Compute();
@@ -91,7 +92,7 @@ motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttl
     // right_back = thrust*altitude_coeff + pitch_setpoint*10 - roll_setpoint*10 - yaw_setpoint;
     
     // set motor limits
-    if (PWMmotor.PWM_RB > maxPWM) PWMmotor.PWM_RB = maxPWM;
+    /* if (PWMmotor.PWM_RB > maxPWM) PWMmotor.PWM_RB = maxPWM;
     else if (PWMmotor.PWM_RB < minPWM) PWMmotor.PWM_RB = minPWM;      
         
     if (PWMmotor.PWM_RF > maxPWM) PWMmotor.PWM_RF = maxPWM;
@@ -102,7 +103,7 @@ motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttl
         
     if (PWMmotor.PWM_LF > maxPWM) PWMmotor.PWM_LF = maxPWM;
     else if (PWMmotor.PWM_LF < minPWM) PWMmotor.PWM_LF = minPWM;
-
+*/
     return PWMmotor;
     
 }

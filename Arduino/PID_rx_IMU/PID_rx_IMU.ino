@@ -2,6 +2,7 @@
 #include "drone.h"
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
+#include "MPU6050.h"
 #include "Wire.h"
 #include "main.h"
 
@@ -24,6 +25,7 @@ void setup()
   Serial.begin(115200);
   PID_init();
   RADIO_init();
+  IMU_init();
 }
 
 
@@ -31,7 +33,7 @@ void loop()
 {
     if (!dmpReady) return;
 
-    while (!mpuInterrupt && fifoCount < packetSize) 
+    while (!mpuInterrupt) 
     {
       RADIO_read(ax_pos, but_pos);
       
@@ -39,14 +41,33 @@ void loop()
       js_yaw = ax_pos[0];
       js_pitch = ax_pos[3];
       js_roll = ax_pos[4];
+
+      IMUyaw = gyro[2];
+      IMUpitch = ypr[1] * 180/M_PI;
+      IMUroll = ypr[2] * 180/M_PI;
+
+            
+      PWMmotor = PID_loop(js_roll, js_pitch, js_yaw, js_throttle, IMUyaw, IMUpitch, IMUroll);
+      //SET SERVOS PWM    
       
-      PWMmotor = PID_loop(js_roll, js_pitch, js_yaw, js_throttle);
-      //SET SERVOS PWM
+    unsigned long time = millis();
+    Serial.println(time);
     }
     
     IMU_read(ypr);
-  
+    Serial.println("IMU READ");
+    unsigned long time = millis();
+    Serial.println(time);
     
+            Serial.print("ypr\t");
+            //Serial.print(ypr[0] * 180/M_PI);
+            Serial.print(gyro[2]);
+            Serial.print("\t");
+            Serial.print(ypr[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(ypr[2] * 180/M_PI);
+    
+    /*
     Serial.print(PWMmotor.PWM_RB);
     Serial.print("  ");
     Serial.print(PWMmotor.PWM_RF);
@@ -54,6 +75,7 @@ void loop()
     Serial.print(PWMmotor.PWM_LB);
     Serial.print("  ");
     Serial.println(PWMmotor.PWM_LF); 
+*/
 
 }
 
@@ -142,15 +164,17 @@ void IMU_read(float* ypr)
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+            mpu.dmpGetGyro(gyro,fifoBuffer);
+           
+            /*
             Serial.print("ypr\t");
-            Serial.print(ypr[0] * 180/M_PI);
+            //Serial.print(ypr[0] * 180/M_PI);
+            Serial.print(gyro[2]);
             Serial.print("\t");
             Serial.print(ypr[1] * 180/M_PI);
             Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);
-            Serial.println(mpuInterrupt);
-
-            
-            
+            Serial.println(ypr[2] * 180/M_PI);               
+            */
     }
+
   }

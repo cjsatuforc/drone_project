@@ -18,11 +18,11 @@ uint8_t fifoBuffer[64]; // FIFO storage buffer
 Quaternion q;           // [w, x, y, z]         quaternion container
 VectorFloat gravity;    // [x, y, z]            gravity vector
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
-
+int16_t gyro[3];
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 
-
-
+int16_t IMUyaw;
+float IMUpitch, IMUroll;
 
 
 double js_roll, js_pitch, js_yaw, js_throttle;
