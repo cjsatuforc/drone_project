@@ -33,8 +33,7 @@ void loop()
 {
     if (!dmpReady) return;
 
-    while (!mpuInterrupt) 
-    {
+   
       RADIO_read(ax_pos, but_pos);
       
       js_throttle = ax_pos[1];
@@ -42,23 +41,18 @@ void loop()
       js_pitch = ax_pos[3];
       js_roll = ax_pos[4];
 
-      IMUyaw = gyro[2];
+      IMUyaw  = gyro[2]* -1;
       IMUpitch = ypr[1] * 180/M_PI;
       IMUroll = ypr[2] * 180/M_PI;
 
             
       PWMmotor = PID_loop(js_roll, js_pitch, js_yaw, js_throttle, IMUyaw, IMUpitch, IMUroll);
       //SET SERVOS PWM    
-      
-    unsigned long time = millis();
-    Serial.println(time);
-    }
-    
+        
     IMU_read(ypr);
-    Serial.println("IMU READ");
     unsigned long time = millis();
-    Serial.println(time);
-    
+    //Serial.print(time);
+    /*
             Serial.print("ypr\t");
             //Serial.print(ypr[0] * 180/M_PI);
             Serial.print(gyro[2]);
@@ -66,8 +60,8 @@ void loop()
             Serial.print(ypr[1] * 180/M_PI);
             Serial.print("\t");
             Serial.println(ypr[2] * 180/M_PI);
+     */
     
-    /*
     Serial.print(PWMmotor.PWM_RB);
     Serial.print("  ");
     Serial.print(PWMmotor.PWM_RF);
@@ -75,7 +69,7 @@ void loop()
     Serial.print(PWMmotor.PWM_LB);
     Serial.print("  ");
     Serial.println(PWMmotor.PWM_LF); 
-*/
+
 
 }
 
