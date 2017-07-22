@@ -20,5 +20,7 @@ void PID_init();
 motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttle, int16_t IMUyaw, float IMUpitch, float IMUroll);
 void RADIO_init();
 void RADIO_read(int16_t* ax_pos, int16_t* but_pos);
+void set_motors(motor PWMmotor);
+void motors_init();
 
 #endif /* DRONE_H_ */

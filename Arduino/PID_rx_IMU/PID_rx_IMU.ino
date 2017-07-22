@@ -23,6 +23,7 @@ void dmpDataReady()
 void setup() 
 {
   Serial.begin(115200);
+  motors_init();
   PID_init();
   RADIO_init();
   IMU_init();
@@ -47,28 +48,24 @@ void loop()
 
             
       PWMmotor = PID_loop(js_roll, js_pitch, js_yaw, js_throttle, IMUyaw, IMUpitch, IMUroll);
-      //SET SERVOS PWM    
+      
+      //set_motors(PWMmotor);
+          
         
     IMU_read(ypr);
-    unsigned long time = millis();
-    //Serial.print(time);
-    /*
-            Serial.print("ypr\t");
-            //Serial.print(ypr[0] * 180/M_PI);
-            Serial.print(gyro[2]);
-            Serial.print("\t");
-            Serial.print(ypr[1] * 180/M_PI);
-            Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);
-     */
+    //unsigned long time = millis();
+    //Serial.println(time);
     
-    Serial.print(PWMmotor.PWM_RB);
-    Serial.print("  ");
-    Serial.print(PWMmotor.PWM_RF);
-    Serial.print("  ");
-    Serial.print(PWMmotor.PWM_LB);
-    Serial.print("  ");
-    Serial.println(PWMmotor.PWM_LF); 
+//            Serial.print("ypr\t");
+//            //Serial.print(ypr[0] * 180/M_PI);
+//            Serial.print(gyro[2]);
+//            Serial.print("\t");
+//            Serial.print(ypr[1] * 180/M_PI);
+//            Serial.print("\t");
+//            Serial.println(ypr[2] * 180/M_PI);
+//     
+//    
+
 
 
 }
@@ -85,7 +82,7 @@ void IMU_init()
 
     while (!Serial);
 
-    Serial.println(F("Initializing I2C devices..."));
+   Serial.println(F("Initializing I2C devices..."));
     mpu.initialize();
     pinMode(INTERRUPT_PIN, INPUT);
 

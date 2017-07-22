@@ -3,6 +3,7 @@
 #include "RF24.h"
 #include "definitions.h"
 #include <SPI.h>
+#include <Servo.h>
 
 
 bool radioNumber = 0;
@@ -30,7 +31,10 @@ PID yaw_PID(&yaw_angular_vel, &err_yaw, &yaw_setpoint, yaw_kp, yaw_ki, yaw_kd, D
 RF24 radio(7,8);
 
 
-
+Servo escRB; 
+Servo escRF; 
+Servo escLB; 
+Servo escLF;
 
 
 void PID_init()
@@ -81,10 +85,10 @@ motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttl
     left_back = thrust*altitude_coeff + 10*err_pitch + 10*err_roll + 10*err_yaw;
     left_front = thrust*altitude_coeff + 10*err_pitch - 10*err_roll - 10*err_yaw;
 
-    PWMmotor.PWM_RB = map(right_back, 1500, 50000, 1000, 2000);
-    PWMmotor.PWM_RF = map(right_front, 1500, 50000, 1000, 2000);
-    PWMmotor.PWM_LB = map(left_back, 1500, 50000, 1000, 2000);
-    PWMmotor.PWM_LF = map(left_front, 1500, 50000, 1000, 2000);
+    PWMmotor.PWM_RB = map(right_back, 1500, 50000, 1000, 1100);
+    PWMmotor.PWM_RF = map(right_front, 1500, 50000, 1000, 1100);
+    PWMmotor.PWM_LB = map(left_back, 1500, 50000, 1000, 1100);
+    PWMmotor.PWM_LF = map(left_front, 1500, 50000, 1000, 1100);
     
     // left_front = thrust*altitude_coeff - pitch_setpoint*10 + roll_setpoint*10 - yaw_setpoint;
     // right_front = thrust*altitude_coeff - pitch_setpoint*10 - roll_setpoint*10 + yaw_setpoint;
@@ -92,7 +96,7 @@ motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttl
     // right_back = thrust*altitude_coeff + pitch_setpoint*10 - roll_setpoint*10 - yaw_setpoint;
     
     // set motor limits
-    /* if (PWMmotor.PWM_RB > maxPWM) PWMmotor.PWM_RB = maxPWM;
+     if (PWMmotor.PWM_RB > maxPWM) PWMmotor.PWM_RB = maxPWM;
     else if (PWMmotor.PWM_RB < minPWM) PWMmotor.PWM_RB = minPWM;      
         
     if (PWMmotor.PWM_RF > maxPWM) PWMmotor.PWM_RF = maxPWM;
@@ -103,8 +107,21 @@ motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttl
         
     if (PWMmotor.PWM_LF > maxPWM) PWMmotor.PWM_LF = maxPWM;
     else if (PWMmotor.PWM_LF < minPWM) PWMmotor.PWM_LF = minPWM;
-*/
-    return PWMmotor;
+
+  escRB.writeMicroseconds(PWMmotor.PWM_RB);                  
+  escRF.writeMicroseconds(PWMmotor.PWM_RF);
+  escLB.writeMicroseconds(PWMmotor.PWM_LB);                  
+  escLF.writeMicroseconds(PWMmotor.PWM_LF); 
+
+    Serial.print(PWMmotor.PWM_RB);
+    Serial.print("  ");
+    Serial.print(PWMmotor.PWM_RF);
+    Serial.print("  ");
+    Serial.print(PWMmotor.PWM_LB);
+    Serial.print("  ");
+    Serial.println(PWMmotor.PWM_LF); 
+    
+    //return PWMmotor;
     
 }
 
@@ -180,4 +197,31 @@ void RADIO_read(int16_t* ax_pos, int16_t* but_pos)
             break;          
         }
     }
+}
+
+void motors_init()
+{
+  delay(5000);
+  escRB.attach(9,1000,2000);
+  escRF.attach(6,1000,2000);
+  escLB.attach(5,1000,2000);
+  escLF.attach(3,1000,2000);
+
+delay(500);
+  
+  escRB.writeMicroseconds(1000);                  
+  escRF.writeMicroseconds(1000);
+  escLB.writeMicroseconds(1000);                  
+  escLF.writeMicroseconds(1000);                  
+  delay(1000);
+}
+  
+
+  
+void set_motors(motor PWMmotor)
+{
+  escRB.writeMicroseconds(PWMmotor.PWM_RB);                  
+  escRF.writeMicroseconds(PWMmotor.PWM_RF);
+  escLB.writeMicroseconds(PWMmotor.PWM_LB);                  
+  escLF.writeMicroseconds(PWMmotor.PWM_LF); 
 }
