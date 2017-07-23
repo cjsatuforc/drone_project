@@ -4,10 +4,7 @@
 
 // #include <asm/types.h> //needs?
 
-struct js_pos {
-   uint8_t button;
-   int16_t  position;
-} joystick;
+
 
 
 
