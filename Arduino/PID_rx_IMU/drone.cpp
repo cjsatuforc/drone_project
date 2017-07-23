@@ -113,13 +113,13 @@ motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttl
   escLB.writeMicroseconds(PWMmotor.PWM_LB);                  
   escLF.writeMicroseconds(PWMmotor.PWM_LF); 
 
-    Serial.print(PWMmotor.PWM_RB);
-    Serial.print("  ");
-    Serial.print(PWMmotor.PWM_RF);
-    Serial.print("  ");
-    Serial.print(PWMmotor.PWM_LB);
-    Serial.print("  ");
-    Serial.println(PWMmotor.PWM_LF); 
+   // Serial.print(PWMmotor.PWM_RB);
+  //  Serial.print("  ");
+  //  Serial.print(PWMmotor.PWM_RF);
+  //  Serial.print("  ");
+  //  Serial.print(PWMmotor.PWM_LB);
+   // Serial.print("  ");
+  //  Serial.println(PWMmotor.PWM_LF); 
     
     //return PWMmotor;
     
@@ -133,10 +133,10 @@ void RADIO_read(int16_t* ax_pos, int16_t* but_pos)
   
     if( radio.available()){
                                                           // Variable for the received timestamp
-    while (radio.available()) 
-    {                                   // While there is data ready
+  //  while (radio.available()) 
+ //   {                                   // While there is data ready
       radio.read( &joystick, sizeof(joystick) );             // Get the payload
-    }
+  //  }
   //Serial.print(joystick.button);
   //Serial.print("  ");
   //Serial.println(joystick.position);
@@ -166,35 +166,7 @@ void RADIO_read(int16_t* ax_pos, int16_t* but_pos)
             break;
           case CP_Y:
             ax_pos[7] = joystick.position;
-            break;
-
-          case BUTTON_A:
-            but_pos[0] = joystick.position;
-            break;
-          case BUTTON_B:
-            but_pos[1] = joystick.position;
-            break;
-          case BUTTON_X:
-            but_pos[2] = joystick.position;
-            break;
-          case BUTTON_Y:
-            but_pos[3] = joystick.position;
-            break;
-          case BUTTON_LB:
-            but_pos[4] = joystick.position;
-            break;
-          case BUTTON_RB:
-            but_pos[5] = joystick.position;
-            break;
-          case BUTTON_BACK:
-            but_pos[6] = joystick.position;
-            break;
-          case BUTTON_START:
-            but_pos[7] = joystick.position;
-            break;
-          case BUTTON_XBOX:
-            but_pos[8] = joystick.position;
-            break;          
+            break;         
         }
     }
 }

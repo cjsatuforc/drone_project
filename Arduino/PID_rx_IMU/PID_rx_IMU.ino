@@ -16,13 +16,13 @@ MPU6050 mpu; //MPU6050 mpu(0x69); <-- use for AD0 high
 
 void dmpDataReady() 
 {
-    mpuInterrupt = true;
+    //mpuInterrupt = true;
 }
 
 
 void setup() 
 {
-  Serial.begin(115200);
+  //Serial.begin(115200);
   motors_init();
   PID_init();
   RADIO_init();
@@ -32,7 +32,7 @@ void setup()
 
 void loop() 
 {
-    if (!dmpReady) return;
+    //if (!dmpReady) return;
 
    
       RADIO_read(ax_pos, but_pos);
@@ -78,20 +78,20 @@ void loop()
 void IMU_init()
 {
     Wire.begin();
-    Wire.setClock(400000);
+    Wire.setClock(100000);
 
-    while (!Serial);
+    //while (!Serial);
 
-   Serial.println(F("Initializing I2C devices..."));
+   //Serial.println(F("Initializing I2C devices..."));
     mpu.initialize();
-    pinMode(INTERRUPT_PIN, INPUT);
+    //pinMode(INTERRUPT_PIN, INPUT);
 
     // verify connection
-    Serial.println(F("Testing device connections..."));
-    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+    //Serial.println(F("Testing device connections..."));
+    //Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 
     // load and configure the DMP
-    Serial.println(F("Initializing DMP..."));
+    //Serial.println(F("Initializing DMP..."));
     devStatus = mpu.dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
@@ -103,38 +103,38 @@ void IMU_init()
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) 
     {
-        Serial.println(F("Enabling DMP..."));
-        mpu.setDMPEnabled(true);
+        //Serial.println(F("Enabling DMP..."));
+       // mpu.setDMPEnabled(true);
 
         // enable Arduino interrupt detection
-        Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-        attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
-        mpuIntStatus = mpu.getIntStatus();
+        //Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
+        //attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
+        //mpuIntStatus = mpu.getIntStatus();
 
         // set our DMP Ready flag so the main loop() function knows it's okay to use it
-        Serial.println(F("DMP ready! Waiting for first interrupt..."));
-        dmpReady = true;
+        //Serial.println(F("DMP ready! Waiting for first interrupt..."));
+        //dmpReady = true;
 
         // get expected DMP packet size for later comparison
-        packetSize = mpu.dmpGetFIFOPacketSize();
+        //packetSize = mpu.dmpGetFIFOPacketSize();
     } 
     
     else 
     {
 
-        Serial.print(F("DMP Initialization failed (code "));        
+        //Serial.print(F("DMP Initialization failed (code "));        
           // 1 = initial memory load failed
           // 2 = DMP configuration updates failed
-        Serial.print(devStatus);
-        Serial.println(F(")"));
+        //Serial.print(devStatus);
+        //Serial.println(F(")"));
     }
 }
 
 
 void IMU_read(float* ypr)
 {
-    mpuInterrupt = false; // reset interrupt flag and get INT_STATUS byte
-    mpuIntStatus = mpu.getIntStatus();
+    //mpuInterrupt = false; // reset interrupt flag and get INT_STATUS byte
+    //mpuIntStatus = mpu.getIntStatus();
 
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
@@ -143,7 +143,7 @@ void IMU_read(float* ypr)
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) 
     {
         mpu.resetFIFO();
-        Serial.println(F("FIFO overflow!"));
+        //Serial.println(F("FIFO overflow!"));
     } 
     
     else if (mpuIntStatus & 0x02) 
@@ -168,4 +168,4 @@ void IMU_read(float* ypr)
             */
     }
 
-  }
+}

@@ -4,7 +4,7 @@
 
 #define M_PI   3.14159265358979323846264338327950288
 
-#define INTERRUPT_PIN 2
+//#define INTERRUPT_PIN 2
 
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
