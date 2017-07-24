@@ -1,165 +1,115 @@
 #include "printf.h"
 #include "drone.h"
-#include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
-#include "MPU6050.h"
 #include "Wire.h"
-#include "main.h"
+#include "MPU6050.h"
 
-MPU6050 mpu; //MPU6050 mpu(0x69); <-- use for AD0 high
+#define M_PI 3.14159265358979323846264338327950288
 
-void dmpDataReady() 
-{
-    //mpuInterrupt = true;
-}
+MPU6050 mpu;
+
+uint8_t mpuIntStatus;
+uint16_t packetSize;
+uint16_t fifoCount;
+uint8_t fifoBuffer[64];
+Quaternion q;
+VectorFloat gravity;
+float ypr[3];
+int16_t gyro[3];
+unsigned long time;
+uint8_t devStatus; 
+
+int16_t IMUyaw;
+float IMUpitch, IMUroll;
 
 
 void setup() 
 {
-  //Serial.begin(115200);
-  motors_init();
+  Serial.begin(115200);
   PID_init();
   RADIO_init();
   IMU_init();
+  motors_init();
 }
 
 
 void loop() 
 {
-    //if (!dmpReady) return;
+  while (fifoCount < packetSize) 
+  {
+      data joystick;
+      joystick = RADIO_read();
 
-   
-      RADIO_read(ax_pos, but_pos);
-      
-      js_throttle = ax_pos[1];
-      js_yaw = ax_pos[0];
-      js_pitch = ax_pos[3];
-      js_roll = ax_pos[4];
-
-      IMUyaw  = gyro[2]* -1;
+      IMUyaw  = 0; //gyro[2]* -1;
       IMUpitch = ypr[1] * 180/M_PI;
       IMUroll = ypr[2] * 180/M_PI;
 
-            
-      PWMmotor = PID_loop(js_roll, js_pitch, js_yaw, js_throttle, IMUyaw, IMUpitch, IMUroll);
-      
-      //set_motors(PWMmotor);
-          
-        
-    IMU_read(ypr);
-    //unsigned long time = millis();
-    //Serial.println(time);
+      Serial.print("ypr\t");
+      Serial.print(IMUyaw);
+      Serial.print("\t");
+      Serial.print(IMUpitch);
+      Serial.print("\t");
+      Serial.print(IMUroll);
+      Serial.println();
+
+      PID_loop(joystick, IMUyaw, IMUpitch, IMUroll);
     
-//            Serial.print("ypr\t");
-//            //Serial.print(ypr[0] * 180/M_PI);
-//            Serial.print(gyro[2]);
-//            Serial.print("\t");
-//            Serial.print(ypr[1] * 180/M_PI);
-//            Serial.print("\t");
-//            Serial.println(ypr[2] * 180/M_PI);
-//     
-//    
+      time = millis();
+      Serial.println(time);
+      fifoCount = mpu.getFIFOCount();
+  }
+
+  if (fifoCount == 1024) mpu.resetFIFO(); 
+  
+  else 
+  {
+      fifoCount = mpu.getFIFOCount();
+      
+      mpu.getFIFOBytes(fifoBuffer, packetSize);
 
 
+      mpu.resetFIFO();
+      
+      fifoCount -= packetSize;
+     
+
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      //mpu.dmpGetGyro(gyro,fifoBuffer);
+      mpu.dmpGetGravity(&gravity, &q);
+      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+      
+     
+//      Serial.print("ypr\t");
+//      Serial.print(ypr[0]*180/PI);
+//      Serial.print("\t");
+//      Serial.print(ypr[1]*180/PI);
+//      Serial.print("\t");
+//      Serial.print(ypr[2]*180/PI);
+//      Serial.println();
+  } 
 
 }
-
-
-
-
 
 
 void IMU_init()
 {
     Wire.begin();
-    Wire.setClock(100000);
-
-    //while (!Serial);
-
-   //Serial.println(F("Initializing I2C devices..."));
+    Wire.setClock(400000L);
     mpu.initialize();
-    //pinMode(INTERRUPT_PIN, INPUT);
-
-    // verify connection
-    //Serial.println(F("Testing device connections..."));
-    //Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
-
-    // load and configure the DMP
-    //Serial.println(F("Initializing DMP..."));
     devStatus = mpu.dmpInitialize();
-
-    // supply your own gyro offsets here, scaled for min sensitivity
-    mpu.setXGyroOffset(220);
-    mpu.setYGyroOffset(76);
-    mpu.setZGyroOffset(-85);
-    mpu.setZAccelOffset(1788);
-
-    // make sure it worked (returns 0 if so)
-    if (devStatus == 0) 
-    {
-        //Serial.println(F("Enabling DMP..."));
-       // mpu.setDMPEnabled(true);
-
-        // enable Arduino interrupt detection
-        //Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-        //attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
-        //mpuIntStatus = mpu.getIntStatus();
-
-        // set our DMP Ready flag so the main loop() function knows it's okay to use it
-        //Serial.println(F("DMP ready! Waiting for first interrupt..."));
-        //dmpReady = true;
-
-        // get expected DMP packet size for later comparison
-        //packetSize = mpu.dmpGetFIFOPacketSize();
-    } 
+    Serial.print("IMU initialise code: ");
+    Serial.println(devStatus);
     
-    else 
-    {
-
-        //Serial.print(F("DMP Initialization failed (code "));        
-          // 1 = initial memory load failed
-          // 2 = DMP configuration updates failed
-        //Serial.print(devStatus);
-        //Serial.println(F(")"));
-    }
+    mpu.setXAccelOffset(-1343);
+    mpu.setYAccelOffset(-1155);
+    mpu.setZAccelOffset(1033);
+    mpu.setXGyroOffset(19);
+    mpu.setYGyroOffset(-27);
+    mpu.setZGyroOffset(16);
+    mpu.setDMPEnabled(true);
+    packetSize = mpu.dmpGetFIFOPacketSize();
 }
 
 
-void IMU_read(float* ypr)
-{
-    //mpuInterrupt = false; // reset interrupt flag and get INT_STATUS byte
-    //mpuIntStatus = mpu.getIntStatus();
 
-    // get current FIFO count
-    fifoCount = mpu.getFIFOCount();
 
-    
-    if ((mpuIntStatus & 0x10) || fifoCount == 1024) 
-    {
-        mpu.resetFIFO();
-        //Serial.println(F("FIFO overflow!"));
-    } 
-    
-    else if (mpuIntStatus & 0x02) 
-    {
-        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
-        fifoCount -= packetSize;
-
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            mpu.dmpGetGyro(gyro,fifoBuffer);
-           
-            /*
-            Serial.print("ypr\t");
-            //Serial.print(ypr[0] * 180/M_PI);
-            Serial.print(gyro[2]);
-            Serial.print("\t");
-            Serial.print(ypr[1] * 180/M_PI);
-            Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);               
-            */
-    }
-
-}

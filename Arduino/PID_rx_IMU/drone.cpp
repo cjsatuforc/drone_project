@@ -6,8 +6,6 @@
 #include <Servo.h>
 
 
-bool radioNumber = 0;
-
 byte addresses[][6] = {"1Node","2Node"};
 
 
@@ -30,11 +28,11 @@ PID yaw_PID(&yaw_angular_vel, &err_yaw, &yaw_setpoint, yaw_kp, yaw_ki, yaw_kd, D
 
 RF24 radio(7,8);
 
-
 Servo escRB; 
 Servo escRF; 
 Servo escLB; 
 Servo escLF;
+
 
 
 void PID_init()
@@ -57,24 +55,22 @@ void RADIO_init()
   
   radio.begin();
   radio.setPALevel(RF24_PA_LOW);
+  radio.setChannel(1);
   radio.openWritingPipe(addresses[0]);
   radio.openReadingPipe(1,addresses[1]);
   radio.startListening();
 }
 
-motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttle, int16_t IMUyaw, float IMUpitch, float IMUroll)
+void PID_loop(data joystick, int16_t IMUyaw, float IMUpitch, float IMUroll)
 {
-    motor PWMmotor;
-
-    roll_setpoint = js_roll; // roll_left;
-    pitch_setpoint = js_pitch; // pitch_forward;
-    yaw_setpoint = js_yaw; // yaw_ccw;
-    altitude_coeff = js_throttle; // throttle_up;
+    roll_setpoint = (joystick.X2 -512)/10; // roll_left;
+    pitch_setpoint = (joystick.Y2 -538)/10; // pitch_forward;
+    yaw_setpoint = (joystick.X1 -500)/10; // yaw_ccw;
+    altitude_coeff = (joystick.Y1 -505)/10; // throttle_up;
 
     roll_angle = IMUroll; //ypr[2] * 180/M_PI; 
     pitch_angle = IMUpitch; //ypr[1] * 180/M_PI;
     yaw_angular_vel = IMUyaw; //gyro[2];
-
 
     roll_PID.Compute();
     pitch_PID.Compute();
@@ -84,92 +80,76 @@ motor PID_loop(double js_roll, double js_pitch, double js_yaw, double js_throttl
     right_front = thrust*altitude_coeff - 10*err_pitch - 10*err_roll + 10*err_yaw;
     left_back = thrust*altitude_coeff + 10*err_pitch + 10*err_roll + 10*err_yaw;
     left_front = thrust*altitude_coeff + 10*err_pitch - 10*err_roll - 10*err_yaw;
-
-    PWMmotor.PWM_RB = map(right_back, 1500, 50000, 1000, 1100);
-    PWMmotor.PWM_RF = map(right_front, 1500, 50000, 1000, 1100);
-    PWMmotor.PWM_LB = map(left_back, 1500, 50000, 1000, 1100);
-    PWMmotor.PWM_LF = map(left_front, 1500, 50000, 1000, 1100);
     
-    // left_front = thrust*altitude_coeff - pitch_setpoint*10 + roll_setpoint*10 - yaw_setpoint;
-    // right_front = thrust*altitude_coeff - pitch_setpoint*10 - roll_setpoint*10 + yaw_setpoint;
-    // left_back = thrust*altitude_coeff + pitch_setpoint*10 + roll_setpoint*10 + yaw_setpoint;
-    // right_back = thrust*altitude_coeff + pitch_setpoint*10 - roll_setpoint*10 - yaw_setpoint;
-    
-    // set motor limits
-     if (PWMmotor.PWM_RB > maxPWM) PWMmotor.PWM_RB = maxPWM;
-    else if (PWMmotor.PWM_RB < minPWM) PWMmotor.PWM_RB = minPWM;      
-        
-    if (PWMmotor.PWM_RF > maxPWM) PWMmotor.PWM_RF = maxPWM;
-    else if (PWMmotor.PWM_RF < minPWM) PWMmotor.PWM_RF = minPWM;    
-        
-    if (PWMmotor.PWM_LB > maxPWM) PWMmotor.PWM_LB = maxPWM;
-    else if (PWMmotor.PWM_LB < minPWM) PWMmotor.PWM_LB = minPWM;        
-        
-    if (PWMmotor.PWM_LF > maxPWM) PWMmotor.PWM_LF = maxPWM;
-    else if (PWMmotor.PWM_LF < minPWM) PWMmotor.PWM_LF = minPWM;
 
-  escRB.writeMicroseconds(PWMmotor.PWM_RB);                  
-  escRF.writeMicroseconds(PWMmotor.PWM_RF);
-  escLB.writeMicroseconds(PWMmotor.PWM_LB);                  
-  escLF.writeMicroseconds(PWMmotor.PWM_LF); 
 
-   // Serial.print(PWMmotor.PWM_RB);
-  //  Serial.print("  ");
-  //  Serial.print(PWMmotor.PWM_RF);
-  //  Serial.print("  ");
-  //  Serial.print(PWMmotor.PWM_LB);
-   // Serial.print("  ");
-  //  Serial.println(PWMmotor.PWM_LF); 
+//        Serial.print(altitude_coeff);
+//        Serial.print("   ");
+//        Serial.print(yaw_setpoint);
+//        Serial.print("   ");
+//        Serial.print(pitch_setpoint);
+//        Serial.print("   ");
+//        Serial.println(roll_setpoint);
+
+
+    right_back = map(right_back, 0, 77000, 1000, 1100);
+    right_front = map(right_front, 0, 77000, 1000, 1100);
+    left_back = map(left_back, 0, 77000, 1000, 1100);
+    left_front = map(left_front, 0, 77000, 1000, 1100);
     
-    //return PWMmotor;
+//        Serial.print(right_back);
+//        Serial.print("   ");
+//        Serial.print(right_front);
+//        Serial.print("   ");
+//        Serial.print(left_back);
+//        Serial.print("   ");
+//        Serial.println(left_front);
+
+    if (right_back > maxPWM) right_back = maxPWM;
+    else if (right_back < minPWM) right_back = minPWM;      
+        
+    if (right_front > maxPWM) right_front = maxPWM;
+    else if (right_front < minPWM) right_front = minPWM;    
+        
+    if (left_back > maxPWM) left_back = maxPWM;
+    else if (left_back < minPWM) left_back = minPWM;        
+        
+    if (left_front > maxPWM) left_front = maxPWM;
+    else if (left_front < minPWM) left_front = minPWM;
+
+
+    escRB.writeMicroseconds(right_back);                  
+    escRF.writeMicroseconds(right_front);
+    escLB.writeMicroseconds(left_back);                  
+    escLF.writeMicroseconds(left_front); 
+
+    
     
 }
 
-void RADIO_read(int16_t* ax_pos, int16_t* but_pos)
+data RADIO_read()
 {
-  
-  //int16_t ax_pos[8] = {0,0,0,0,0,0,0,0};
-  //int16_t but_pos[9] = {0,0,0,0,0,0,0,0};
-  
-    if( radio.available()){
-                                                          // Variable for the received timestamp
-  //  while (radio.available()) 
- //   {                                   // While there is data ready
-      radio.read( &joystick, sizeof(joystick) );             // Get the payload
-  //  }
-  //Serial.print(joystick.button);
-  //Serial.print("  ");
-  //Serial.println(joystick.position);
-
-  switch (joystick.button)
-        {
-          case JS1_X:
-            ax_pos[0] = joystick.position *-1;
-            break;
-          case JS1_Y:
-            ax_pos[1] = joystick.position *-1;
-            break;
-          case JS2_X:
-            ax_pos[3] = joystick.position;
-            break;
-          case JS2_Y:
-            ax_pos[4] = joystick.position *-1;
-            break;
-          case LT:
-            ax_pos[2] = joystick.position;
-            break;
-          case RT:
-            ax_pos[5] = joystick.position;
-            break;
-          case CP_X:
-            ax_pos[6] = joystick.position;
-            break;
-          case CP_Y:
-            ax_pos[7] = joystick.position;
-            break;         
-        }
-    }
+   data joystick;
+      if( radio.available())
+      {
+                                                                                
+        radio.read( &joystick, sizeof(joystick) ); 
+      
+//        Serial.print(joystick.X1);
+//        Serial.print("   ");
+//        Serial.print(joystick.Y1);
+//        Serial.print("   ");
+//        Serial.print(joystick.X2);
+//        Serial.print("   ");
+//        Serial.println(joystick.Y2);
+//  
+//        got_time = millis();
+//        Serial.println(got_time);
+        
+      }
+  return joystick;
 }
+
 
 void motors_init()
 {
@@ -186,14 +166,4 @@ delay(500);
   escLB.writeMicroseconds(1000);                  
   escLF.writeMicroseconds(1000);                  
   delay(1000);
-}
-  
-
-  
-void set_motors(motor PWMmotor)
-{
-  escRB.writeMicroseconds(PWMmotor.PWM_RB);                  
-  escRF.writeMicroseconds(PWMmotor.PWM_RF);
-  escLB.writeMicroseconds(PWMmotor.PWM_LB);                  
-  escLF.writeMicroseconds(PWMmotor.PWM_LF); 
 }
