@@ -35,10 +35,9 @@ void setup()
 
 void loop() 
 {
-  while (fifoCount < packetSize) 
-  {
       data joystick;
       joystick = RADIO_read();
+      Serial.print("Radio_read");
 
       IMUyaw  = 0; //gyro[2]* -1;
       IMUpitch = ypr[1] * 180/M_PI;
@@ -56,37 +55,41 @@ void loop()
     
       time = millis();
       Serial.println(time);
+
       fifoCount = mpu.getFIFOCount();
-  }
-
-  if (fifoCount == 1024) mpu.resetFIFO(); 
-  
-  else 
-  {
-      fifoCount = mpu.getFIFOCount();
-      
-      mpu.getFIFOBytes(fifoBuffer, packetSize);
-
-
-      mpu.resetFIFO();
-      
-      fifoCount -= packetSize;
+      if (fifoCount == 1024) 
+      {
+          mpu.resetFIFO();
+          Serial.println(F("FIFO overflow!"));       
+      }
+      else
+      {
+          if (fifoCount % packetSize != 0) 
+          {
+              mpu.resetFIFO();
+              Serial.println(F("Packet is corrupted!"));     
+          }
+          else
+          {
+              while (fifoCount >= packetSize) 
+              {
+                  mpu.getFIFOBytes(fifoBuffer,packetSize);
+                  fifoCount -= packetSize;
+              }
+              mpu.dmpGetQuaternion(&q,fifoBuffer);
+              mpu.dmpGetGravity(&gravity,&q);
+              mpu.dmpGetYawPitchRoll(ypr,&q,&gravity);          
+             
+              Serial.print("ypr\t");
+              Serial.print(ypr[0]*180/PI);
+              Serial.print("\t");
+              Serial.print(ypr[1]*180/PI);
+              Serial.print("\t");
+              Serial.print(ypr[2]*180/PI);
+              Serial.println();      
+        }
      
-
-      mpu.dmpGetQuaternion(&q, fifoBuffer);
-      //mpu.dmpGetGyro(gyro,fifoBuffer);
-      mpu.dmpGetGravity(&gravity, &q);
-      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-      
-     
-//      Serial.print("ypr\t");
-//      Serial.print(ypr[0]*180/PI);
-//      Serial.print("\t");
-//      Serial.print(ypr[1]*180/PI);
-//      Serial.print("\t");
-//      Serial.print(ypr[2]*180/PI);
-//      Serial.println();
-  } 
+    }
 
 }
 
@@ -94,7 +97,7 @@ void loop()
 void IMU_init()
 {
     Wire.begin();
-    Wire.setClock(400000L);
+    //Wire.setClock(400000L);
     mpu.initialize();
     devStatus = mpu.dmpInitialize();
     Serial.print("IMU initialise code: ");
