@@ -4,7 +4,7 @@
 #include "Wire.h"
 #include "MPU6050.h"
 
-#define M_PI 3.14159265358979323846264338327950288
+//#define M_PI 3.14159265358979323846264338327950288
 
 MPU6050 mpu;
 
@@ -35,61 +35,76 @@ void setup()
 
 void loop() 
 {
+  fifoCount = mpu.getFIFOCount();
+  if (fifoCount < packetSize)
+  {
       data joystick;
       joystick = RADIO_read();
-      Serial.print("Radio_read");
 
       IMUyaw  = 0; //gyro[2]* -1;
       IMUpitch = ypr[1] * 180/M_PI;
       IMUroll = ypr[2] * 180/M_PI;
 
-      Serial.print("ypr\t");
-      Serial.print(IMUyaw);
-      Serial.print("\t");
-      Serial.print(IMUpitch);
-      Serial.print("\t");
-      Serial.print(IMUroll);
-      Serial.println();
+//      Serial.print("ypr\t");
+//      Serial.print(IMUyaw);
+//      Serial.print("\t");
+//      Serial.print(IMUpitch);
+//      Serial.print("\t");
+//      Serial.print(IMUroll);
+//      Serial.println();
 
       PID_loop(joystick, IMUyaw, IMUpitch, IMUroll);
     
-      time = millis();
-      Serial.println(time);
-
+      //time = millis();
+      //Serial.println(time);
       fifoCount = mpu.getFIFOCount();
-      if (fifoCount == 1024) 
-      {
-          mpu.resetFIFO();
-          Serial.println(F("FIFO overflow!"));       
-      }
-      else
-      {
-          if (fifoCount % packetSize != 0) 
-          {
-              mpu.resetFIFO();
-              Serial.println(F("Packet is corrupted!"));     
-          }
-          else
-          {
-              while (fifoCount >= packetSize) 
-              {
-                  mpu.getFIFOBytes(fifoBuffer,packetSize);
-                  fifoCount -= packetSize;
-              }
-              mpu.dmpGetQuaternion(&q,fifoBuffer);
-              mpu.dmpGetGravity(&gravity,&q);
-              mpu.dmpGetYawPitchRoll(ypr,&q,&gravity);          
-             
-              Serial.print("ypr\t");
-              Serial.print(ypr[0]*180/PI);
-              Serial.print("\t");
-              Serial.print(ypr[1]*180/PI);
-              Serial.print("\t");
-              Serial.print(ypr[2]*180/PI);
-              Serial.println();      
-        }
+  }
+  else if (fifoCount == 1024) mpu.resetFIFO(); 
+  
+  else if (fifoCount > packetSize)
+  {
+      data joystick;
+      joystick = RADIO_read();
+
+      IMUyaw  = 0; //gyro[2]* -1;
+      IMUpitch = ypr[1] * 180/M_PI;
+      IMUroll = ypr[2] * 180/M_PI;
+
+//      Serial.print("ypr\t");
+//      Serial.print(IMUyaw);
+//      Serial.print("\t");
+//      Serial.print(IMUpitch);
+//      Serial.print("\t");
+//      Serial.print(IMUroll);
+//      Serial.println();
+
+      PID_loop(joystick, IMUyaw, IMUpitch, IMUroll);
+    
+      //time = millis();
+      //Serial.println(time);
+      fifoCount = mpu.getFIFOCount();
+      
+      mpu.getFIFOBytes(fifoBuffer, packetSize);
+
+      
+       mpu.resetFIFO();
+      fifoCount -= packetSize;
      
-    }
+
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      //mpu.dmpGetGyro(gyro,fifoBuffer);
+      mpu.dmpGetGravity(&gravity, &q);
+      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+     
+     
+//      Serial.print("ypr\t");
+//      Serial.print(ypr[0]*180/PI);
+//      Serial.print("\t");
+//      Serial.print(ypr[1]*180/PI);
+//      Serial.print("\t");
+//      Serial.print(ypr[2]*180/PI);
+//      Serial.println();
+  } 
 
 }
 
@@ -100,8 +115,8 @@ void IMU_init()
     //Wire.setClock(400000L);
     mpu.initialize();
     devStatus = mpu.dmpInitialize();
-    Serial.print("IMU initialise code: ");
-    Serial.println(devStatus);
+    //Serial.print("IMU initialise code: ");
+    //Serial.println(devStatus);
     
     mpu.setXAccelOffset(-1343);
     mpu.setYAccelOffset(-1155);
@@ -112,7 +127,3 @@ void IMU_init()
     mpu.setDMPEnabled(true);
     packetSize = mpu.dmpGetFIFOPacketSize();
 }
-
-
-
-

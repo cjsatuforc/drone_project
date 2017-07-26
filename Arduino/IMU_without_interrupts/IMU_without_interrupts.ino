@@ -34,41 +34,36 @@ Serial.begin(115200);
 }
 
 
-void loop() {
-  while (fifoCount < packetSize) {
-    //do stuff
-      time = millis();
-      Serial.println(time);
-    fifoCount = mpu.getFIFOCount();
-  }
+void loop() 
+{
+
+      fifoCount = mpu.getFIFOCount();
 
   if (fifoCount == 1024) mpu.resetFIFO(); 
   
-  else {
-      fifoCount = mpu.getFIFOCount();
-      
+  else if (fifoCount > packetSize)
+  {
       mpu.getFIFOBytes(fifoBuffer, packetSize);
 
-
-      mpu.resetFIFO(); 
+      
       
       fifoCount -= packetSize;
+     
 
-
-        mpu.dmpGetQuaternion(&q, fifoBuffer);
-        mpu.dmpGetGravity(&gravity, &q);
-        mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-        
-       
-        Serial.print("ypr\t");
-        Serial.print(ypr[0]*180/PI);
-        Serial.print("\t");
-        Serial.print(ypr[1]*180/PI);
-        Serial.print("\t");
-        Serial.print(ypr[2]*180/PI);
-        Serial.println();
-    
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      //mpu.dmpGetGyro(gyro,fifoBuffer);
+      mpu.dmpGetGravity(&gravity, &q);
+      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    mpu.resetFIFO();
+     
+      Serial.print("ypr\t");
+      Serial.print(ypr[0]*180/PI);
+      Serial.print("\t");
+      Serial.print(ypr[1]*180/PI);
+      Serial.print("\t");
+      Serial.print(ypr[2]*180/PI);
+      Serial.println();
   } 
 
-
 }
+

@@ -38,7 +38,13 @@ void loop() {
   joystick.Y2 = analogRead(JOY_Y2);
                     
   ok = radio.write( &joystick, sizeof(joystick)); 
-  Serial.println(joystick.X1);  
+  Serial.print(joystick.X1);
+  Serial.print("\t");
+  Serial.print(joystick.Y1);  
+  Serial.print("\t");
+  Serial.print(joystick.X2);  
+  Serial.print("\t");
+  Serial.println(joystick.Y2);    
    
 
 } 

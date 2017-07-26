@@ -68,9 +68,9 @@ void PID_loop(data joystick, int16_t IMUyaw, float IMUpitch, float IMUroll)
     yaw_setpoint = (joystick.X1 -500)/10; // yaw_ccw;
     altitude_coeff = (joystick.Y1 -505)/10; // throttle_up;
 
-    roll_angle = IMUroll; //ypr[2] * 180/M_PI; 
-    pitch_angle = IMUpitch; //ypr[1] * 180/M_PI;
-    yaw_angular_vel = IMUyaw; //gyro[2];
+    roll_angle = 0;//IMUroll; //ypr[2] * 180/M_PI; 
+    pitch_angle = 0;//IMUpitch; //ypr[1] * 180/M_PI;
+    yaw_angular_vel = 0;//IMUyaw; //gyro[2];
 
     roll_PID.Compute();
     pitch_PID.Compute();
@@ -97,13 +97,13 @@ void PID_loop(data joystick, int16_t IMUyaw, float IMUpitch, float IMUroll)
     left_back = map(left_back, 0, 77000, 1000, 1100);
     left_front = map(left_front, 0, 77000, 1000, 1100);
     
-//        Serial.print(right_back);
-//        Serial.print("   ");
-//        Serial.print(right_front);
-//        Serial.print("   ");
-//        Serial.print(left_back);
-//        Serial.print("   ");
-//        Serial.println(left_front);
+        Serial.print(right_back);
+        Serial.print("   ");
+        Serial.print(right_front);
+        Serial.print("   ");
+        Serial.print(left_back);
+        Serial.print("   ");
+        Serial.println(left_front);
 
     if (right_back > maxPWM) right_back = maxPWM;
     else if (right_back < minPWM) right_back = minPWM;      
