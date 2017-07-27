@@ -1,0 +1,13 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Our final constructed drone.The IMU sits directly in the centre of the frame and is mounted on foam to dampen vibrations from the motors.}}{3}{figure.9}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Figure showing the output of the sensor serial print when using the MPU-9250 library, and passing the raw accelerometer, gyrometer, and magnetometer outputs through a Mahony Quaternion filter. Print statements of time returned from the millis() function shows that each loop takes approximately 4 to 5 ms.}}{5}{figure.15}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Figure showing the output of the sensor serial print when using the MPU-6050 library and receiving outputted data from the DMP. Time between each loop is output between each sensor read. Each loop takes approximately 8 ms. After some initial calibration and orientation, the data was very steady and constant, with very little drift.}}{7}{figure.19}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Image showing set up of my Seeeduino connected to the 8-digit MAX7219 display. Currently showing yaw. This value would update to display the correct value for yaw as the sensor was moved. The display is connected to the Seeeduino through an SPI interface, and the IMU MPU-9250 sensor is connected via I2 C. Serial output is being monitored via the USB connection.}}{10}{figure.26}
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Oscilloscope traces showing changes in duty cycles to all 4 PWM motor outputs as the sensor moved orientation}}{11}{figure.31}
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Orientation of the MPU-9250 chip, used in our IMU. Used to determine directions of roll, pitch and yaw}}{12}{figure.35}
+\contentsline {figure}{\numberline {5.4}{\ignorespaces Output of calibration program used to determine offsets for the MPU-9250 IMU. Values correspond to accelerometer x, y, z, gyrometer x, y,z}}{13}{figure.38}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
