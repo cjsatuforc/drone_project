@@ -17,10 +17,10 @@ double roll_setpoint, pitch_setpoint, yaw_setpoint, altitude_coeff;
 double roll_angle, pitch_angle, yaw_angular_vel;
 double err_roll, err_pitch, err_yaw;
 
-double roll_kp = 10, roll_ki = 0, roll_kd = 0;
-double pitch_kp = 10, pitch_ki = 0, pitch_kd = 0;
-double yaw_kp = 10, yaw_ki = 0, yaw_kd = 0;
-
+double roll_kp = 0, roll_ki = 0, roll_kd = 0;
+double pitch_kp = 0, pitch_ki = 0, pitch_kd = 0;
+double yaw_kp = 0, yaw_ki = 0, yaw_kd = 0;
+int counter = 0;
 
 PID roll_PID(&roll_angle, &err_roll, &roll_setpoint, roll_kp, roll_ki, roll_kd, DIRECT);
 PID pitch_PID(&pitch_angle, &err_pitch, &pitch_setpoint, pitch_kp, pitch_ki, pitch_kd, DIRECT);
@@ -42,9 +42,9 @@ void PID_init()
 	pitch_setpoint = 0;
 	yaw_setpoint = 0;
   
-  //  roll_PID.SetTunings(roll_kp, roll_ki, roll_kd);         This is for Ben's part for tunning
-  //  pitch_PID.SetTunings(pitch_kp, pitch_ki, pitch_kd);     the PID values via the web server
-  //  yaw_PID.SetTunings(yaw_kp, yaw_ki, yaw_kd);
+    roll_PID.SetTunings(roll_kp, roll_ki, roll_kd);       
+    pitch_PID.SetTunings(pitch_kp, pitch_ki, pitch_kd);    
+    yaw_PID.SetTunings(yaw_kp, yaw_ki, yaw_kd);
   roll_PID.SetMode(AUTOMATIC);
   pitch_PID.SetMode(AUTOMATIC);
   yaw_PID.SetMode(AUTOMATIC);   
@@ -63,23 +63,36 @@ void RADIO_init()
 
 void PID_loop(data joystick, int16_t IMUyaw, float IMUpitch, float IMUroll)
 {
+  
+    switch(joystick.PIDax){
+    case 1: roll_PID.SetTunings(joystick.PID, roll_ki, roll_kd);
+            pitch_kp = joystick.PID;
+            break;
+    case 2: roll_PID.SetTunings(pitch_kp, joystick.PID, roll_kd);
+            pitch_ki = joystick.PID; 
+            break;
+    case 3: roll_PID.SetTunings(pitch_kp, roll_ki, joystick.PID); 
+            pitch_kd = joystick.PID;
+            break;
+  }
+  
     roll_setpoint = (joystick.X2 -512)/10; // roll_left;
     pitch_setpoint = (joystick.Y2 -538)/10; // pitch_forward;
-    yaw_setpoint = (joystick.X1 -500)/10; // yaw_ccw;
+    yaw_setpoint = -(joystick.X1 -500)/10; // yaw_ccw;
     altitude_coeff = (joystick.Y1 -505)/10; // throttle_up;
 
-    roll_angle = 0;//IMUroll; //ypr[2] * 180/M_PI; 
-    pitch_angle = 0;//IMUpitch; //ypr[1] * 180/M_PI;
-    yaw_angular_vel = 0;//IMUyaw; //gyro[2];
+    roll_angle = IMUroll; //ypr[2] * 180/M_PI; 
+    pitch_angle = IMUpitch; //ypr[1] * 180/M_PI;
+    yaw_angular_vel = IMUyaw; //gyro[2];
 
     roll_PID.Compute();
     pitch_PID.Compute();
     yaw_PID.Compute();
 
-    right_back = thrust*altitude_coeff - 10*err_pitch + 10*err_roll - 10*err_yaw;
-    right_front = thrust*altitude_coeff - 10*err_pitch - 10*err_roll + 10*err_yaw;
-    left_back = thrust*altitude_coeff + 10*err_pitch + 10*err_roll + 10*err_yaw;
-    left_front = thrust*altitude_coeff + 10*err_pitch - 10*err_roll - 10*err_yaw;
+    right_back = thrust*altitude_coeff - 30*err_pitch + 30*err_roll - 10*err_yaw;
+    right_front = thrust*altitude_coeff - 30*err_pitch - 30*err_roll + 10*err_yaw;
+    left_back = thrust*altitude_coeff + 30*err_pitch + 30*err_roll + 10*err_yaw;
+    left_front = thrust*altitude_coeff + 30*err_pitch - 30*err_roll - 10*err_yaw;
     
 
 
@@ -92,10 +105,10 @@ void PID_loop(data joystick, int16_t IMUyaw, float IMUpitch, float IMUroll)
 //        Serial.println(roll_setpoint);
 
 
-    right_back = map(right_back, 0, 77000, 1000, 1100);
-    right_front = map(right_front, 0, 77000, 1000, 1100);
-    left_back = map(left_back, 0, 77000, 1000, 1100);
-    left_front = map(left_front, 0, 77000, 1000, 1100);
+    right_back = map(right_back, 0, 77000, 1000, 1400);
+    right_front = map(right_front, 0, 77000, 1000, 1400);
+    left_back = map(left_back, 0, 77000, 1000, 1400);
+    left_front = map(left_front, 0, 77000, 1000, 1400);
     
         Serial.print(right_back);
         Serial.print("   ");
@@ -132,7 +145,7 @@ data RADIO_read()
    data joystick;
       if( radio.available())
       {
-                                                                                
+        counter = 0;                                                                        
         radio.read( &joystick, sizeof(joystick) ); 
       
 //        Serial.print(joystick.X1);
@@ -146,6 +159,13 @@ data RADIO_read()
 //        got_time = millis();
 //        Serial.println(got_time);
         
+      }
+      if(!radio.available())
+      {
+        counter++;
+        //Serial.print("no radio");
+        if (counter == 6)
+          come_down(left_front, right_front, left_back, right_back);
       }
   return joystick;
 }
@@ -167,3 +187,25 @@ delay(500);
   escLF.writeMicroseconds(1000);                  
   delay(1000);
 }
+
+
+void come_down(double left_front, double right_front, double left_back, double right_back)
+{  
+  int i;
+  for(i = left_front; i > 900; i--)
+  {
+    left_front = left_front - 1;
+    right_front = left_front;
+    left_back = left_front;
+    right_back = left_front;   
+    escRB.writeMicroseconds(right_back);                  
+    escRF.writeMicroseconds(right_front);
+    escLB.writeMicroseconds(left_back);                  
+    escLF.writeMicroseconds(left_front);
+          
+
+  }
+while(1)
+{}
+}
+

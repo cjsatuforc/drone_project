@@ -13,7 +13,8 @@ RF24 radio(7,8);
 
 struct data
 {
-  int X1, Y1, X2, Y2, PIDax;
+  int X1, Y1, X2, Y2;
+  int PIDax;
   double PID;
 } joystick;
 

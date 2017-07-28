@@ -87,9 +87,9 @@ void PID_loop(data joystick, int16_t IMUyaw, float IMUpitch, float IMUroll)
     yaw_setpoint = (joystick.X1 -500)/10; // yaw_ccw;
     altitude_coeff = (joystick.Y1 -505)/10; // throttle_up;
 
-    roll_angle = 0;//IMUroll; //ypr[2] * 180/M_PI; 
-    pitch_angle = 0;//IMUpitch; //ypr[1] * 180/M_PI;
-    yaw_angular_vel = 0;//IMUyaw; //gyro[2];
+    roll_angle = IMUroll; //ypr[2] * 180/M_PI; 
+    pitch_angle = IMUpitch; //ypr[1] * 180/M_PI;
+    yaw_angular_vel = IMUyaw; //gyro[2];
   
     roll_PID.Compute();
     pitch_PID.Compute();
@@ -137,10 +137,10 @@ void PID_loop(data joystick, int16_t IMUyaw, float IMUpitch, float IMUroll)
     else if (left_front < minPWM) left_front = minPWM;
 
 
-//    escRB.writeMicroseconds(right_back);                  
-//    escRF.writeMicroseconds(right_front);
-//    escLB.writeMicroseconds(left_back);                  
-//    escLF.writeMicroseconds(left_front); 
+    escRB.writeMicroseconds(right_back);                  
+    escRF.writeMicroseconds(right_front);
+    escLB.writeMicroseconds(left_back);                  
+    escLF.writeMicroseconds(left_front); 
 
     
     
@@ -163,8 +163,12 @@ data RADIO_read()
 //        Serial.println(joystick.Y2);
 //  
 //        got_time = millis();
-//        Serial.println(got_time);
-        
+//        Serial.println(got_time);        
+      }
+      if(!radio.available())
+      {
+        Serial.print("no radio");
+        come_down(left_front, right_front, left_back, right_back);
       }
   return joystick;
 }
@@ -185,4 +189,24 @@ delay(500);
   escLB.writeMicroseconds(1000);                  
   escLF.writeMicroseconds(1000);                  
   delay(1000);
+}
+
+void come_down(double left_front, double right_front, double left_back, double right_back)
+{  
+  int i;
+  for(i = left_front; i > 1000; i--)
+  {
+    left_front = left_front - 1;
+    right_front = left_front;
+    left_back = left_front;
+    right_back = left_front;   
+    escRB.writeMicroseconds(right_back);                  
+    escRF.writeMicroseconds(right_front);
+    escLB.writeMicroseconds(left_back);                  
+    escLF.writeMicroseconds(left_front);
+          
+
+  }
+while(1)
+{}
 }

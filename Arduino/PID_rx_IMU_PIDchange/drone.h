@@ -22,5 +22,6 @@ void PID_loop(data joystick, int16_t IMUyaw, float IMUpitch, float IMUroll);
 void RADIO_init();
 data RADIO_read();
 void motors_init();
+void come_down(double left_front, double right_front, double left_back, double right_back);
 
 #endif /* DRONE_H_ */

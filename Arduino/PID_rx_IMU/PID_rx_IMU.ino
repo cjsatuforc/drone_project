@@ -41,9 +41,9 @@ void loop()
       data joystick;
       joystick = RADIO_read();
 
-      IMUyaw  = 0; //gyro[2]* -1;
-      IMUpitch = ypr[1] * 180/M_PI;
-      IMUroll = ypr[2] * 180/M_PI;
+      IMUyaw  = gyro[2]* -1;
+      IMUpitch = (ypr[1] * 180/M_PI) - 0.80;
+      IMUroll = (ypr[2] * 180/M_PI) + 2.85;
 
 //      Serial.print("ypr\t");
 //      Serial.print(IMUyaw);
@@ -92,7 +92,7 @@ void loop()
      
 
       mpu.dmpGetQuaternion(&q, fifoBuffer);
-      //mpu.dmpGetGyro(gyro,fifoBuffer);
+      mpu.dmpGetGyro(gyro,fifoBuffer);
       mpu.dmpGetGravity(&gravity, &q);
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
      

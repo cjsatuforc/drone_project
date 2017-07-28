@@ -35,13 +35,18 @@ void setup()
 
 void loop() 
 {
+//  if (devStatus)
+//  {
+//    while(1)
+//    {}
+//  }
   fifoCount = mpu.getFIFOCount();
   if (fifoCount < packetSize)
   {
       data joystick;
       joystick = RADIO_read();
 
-      IMUyaw  = 0; //gyro[2]* -1;
+      IMUyaw  = 0;//gyro[2]* -1;
       IMUpitch = ypr[1] * 180/M_PI;
       IMUroll = ypr[2] * 180/M_PI;
 
